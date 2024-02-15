@@ -1,8 +1,9 @@
-import net from 'net'
+var net = require('net')
 
 var server = net.createServer();
 server.on('connection', handleConnection);
-server.listen(9000, function () {
+var PORT = process.env.PORT || 9000
+server.listen(PORT, function () {
     console.log('server listening to %j', server.address());
 });
 

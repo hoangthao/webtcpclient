@@ -1,14 +1,13 @@
 package com.example.webtcpclient;
 
 import io.netty.channel.ChannelOption;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.netty.tcp.TcpClient;
 
@@ -27,8 +26,9 @@ public class ConnectionConfig {
                 .build();
     }
 
-    @Bean
-    public TcpClient tcpClient(ConnectionProvider connectionProvider) {
+    @Bean @Primary
+    @Qualifier("tcpClientPrimary")
+    public TcpClient tcpClientPrimary(ConnectionProvider connectionProvider) {
 //        int maxFrameLength = Integer.MAX_VALUE;
 //        int lengthFieldOffset = 0;
 //        int lengthFieldLength = 2;
@@ -44,6 +44,20 @@ public class ConnectionConfig {
                                 .addHandlerFirst(new LoggingHandler(LogLevel.INFO))
 //                                .addHandlerLast(new LengthFieldBasedFrameDecoder(maxFrameLength, lengthFieldOffset,
 //                                        lengthFieldLength, lengthAdjustment, initialBytesToStrip))
+                ).wiretap(true);
+    }
+
+    @Bean
+    @Qualifier("tcpClientSecondary")
+    public TcpClient tcpClientSecondary(ConnectionProvider connectionProvider) {
+        return TcpClient.create(connectionProvider)
+                .host("localhost").port(9001)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+                .option(ChannelOption.SO_KEEPALIVE, true)
+                .doOnConnected( connection ->
+                                connection
+                                        .addHandlerFirst(new ReadTimeoutHandler(5, TimeUnit.SECONDS))
+                                        .addHandlerFirst(new LoggingHandler(LogLevel.INFO))
                 ).wiretap(true);
     }
 }

@@ -23,18 +23,24 @@ public class HomeController {
         return Mono.just(name.toUpperCase());
     }
 
-    @GetMapping("/tcp1")
+    @GetMapping("/tcp")
     public Mono<String> home1(@RequestParam(defaultValue = "Unknown") String name) {
         return welcomeService.capitalize(name);
     }
 
     @GetMapping("/tcp2")
+    public Mono<String> home5(@RequestParam(defaultValue = "Unknown") String name) {
+        return welcomeService.capitalize5(name);
+    }
+
+    // add Success/Error listener + circuit breaker resilient4j
+    @GetMapping("/v2/tcp")
     public Mono<String> home2(@RequestParam(defaultValue = "Unknown") String name) {
         TcpRequest<String, String> req = new TcpRequest<String, String>(name,
                 new ArrayList<>(),
                 new ArrayList<>(),
                 new ArrayList<>()).addHandler(logHandlerCustomizer);
-        return gateway.send(req);
+        return gateway.sendTcpServer(req);
     }
 
 }

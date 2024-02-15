@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
+import reactor.netty.Connection;
 import reactor.netty.tcp.TcpClient;
 
 import java.io.IOException;
@@ -27,6 +28,29 @@ import java.util.concurrent.atomic.AtomicReference;
 public class WelcomeService {
 
     private final TcpClient tcpClient;
+
+    public Mono<String> capitalize5(String name) {
+        CompletableFuture<String> completableFuture = new CompletableFuture<>();
+
+        tcpClient.doOnDisconnected(connection -> log.info("--- disconnected"))
+            .connect()
+            .flatMap(conn -> {
+                conn.outbound()
+                        .sendString(Mono.just(name)) // prepend length
+                        .then()
+                        .subscribe();
+                return conn.inbound().receive().asString().next()
+                        .doAfterTerminate(conn::dispose)
+                        .flatMap(resp -> {
+                            log.info("resp {}", resp);
+                            completableFuture.complete(resp);
+                            return Mono.empty();
+                        });
+            })
+            .subscribe();
+
+        return Mono.fromFuture(completableFuture);
+    }
 
     public Mono<String> capitalize(String name) {
         CompletableFuture<String> completableFuture = new CompletableFuture<>();

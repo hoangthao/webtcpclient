@@ -1,0 +1,15 @@
+{
+  "name": "webtcpclient",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/hoangthao/webtcpclient.git",
+  "author": "thao nguyen <hoangthao.sg@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "net": "^1.0.2"
+  },
+  "scripts": {
+    "dev-1": "node tcp-server.js",
+    "dev-2": "set PORT=9001 && node tcp-server.js"
+  }
+}

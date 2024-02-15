@@ -9,12 +9,12 @@ public class LogHandlerCustomizer implements TcpErrorListener, TcpSuccessListene
 
     @Override
     public void onError(String request, Exception ex) {
-        log.error("=====req {} with err {}", request, ex.getMessage());
+        log.warn(">>>>>req {} with err {}", request, ex.getMessage());
     }
 
     @Override
     public void onSuccess(String request, String response) {
-        log.info("=====req {} with resp {}", request, response);
+        log.warn(">>>>>req {} with resp {}", request, response);
     }
 
 
