@@ -40,7 +40,7 @@ public class ConnectionConfig {
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .doOnConnected( connection ->
                         connection
-                                .addHandlerFirst(new ReadTimeoutHandler(5, TimeUnit.SECONDS))
+                                .addHandlerFirst(new ReadTimeoutHandler(8, TimeUnit.SECONDS))
                                 .addHandlerFirst(new LoggingHandler(LogLevel.INFO))
 //                                .addHandlerLast(new LengthFieldBasedFrameDecoder(maxFrameLength, lengthFieldOffset,
 //                                        lengthFieldLength, lengthAdjustment, initialBytesToStrip))

@@ -29,6 +29,43 @@ public class WelcomeService {
 
     private final TcpClient tcpClient;
 
+    public Mono<String> capitalize6(String name) {
+
+       return tcpClient.doOnDisconnected(connection -> log.info("--- disconnected 7"))
+                .connect()
+
+               .onErrorResume(ConnectException.class, e -> {
+                   System.out.println("ERROR__ 2" + e.getMessage());
+                   return Mono.error(new ConnectException("new exception"));
+               })
+                .flatMap(conn -> process(conn, name));
+    }
+
+    private Mono<String> process(Connection conn, String name) {
+        return Mono.defer(() -> conn.outbound()
+                .sendString(Mono.just(name)) // prepend length
+                .then()).then(conn.inbound().receive().asString().next()
+                .doAfterTerminate(conn::dispose)
+                .onErrorResume(ReadTimeoutException.class, e -> {
+                    System.out.println("ERROR__ 1" + e.getMessage());
+                    return Mono.error(new ReadTimeoutException("new timeout"));
+                })
+                .flatMap(resp -> {
+                    log.info("resp {}", resp);
+                    return Mono.just(resp);
+                }));
+//        return conn.outbound()
+//                .sendString(Mono.just(name)) // prepend length
+//                .then().flatMap(sa -> {
+//                    return conn.inbound().receive().asString().next()
+//                            .doAfterTerminate(conn::dispose)
+//                            .flatMap(resp -> {
+//                                log.info("resp {}", resp);
+//                                return Mono.just(resp);
+//                            });
+//                });
+    }
+
     public Mono<String> capitalize5(String name) {
         CompletableFuture<String> completableFuture = new CompletableFuture<>();
 

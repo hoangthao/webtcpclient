@@ -16,8 +16,22 @@ function handleConnection(conn) {
     conn.on('error', onConnError);
     function onConnData(d) {
         console.log('connection data from %s: %j', remoteAddress, d);
-        conn.write(d.toUpperCase());
-        conn.end()
+        if (d === 'timeout5') {
+            setTimeout(() => {
+                conn.write(d.toUpperCase());
+                conn.end()
+            }, 5000);
+        } else if (d === 'timeout10') {
+                      setTimeout(() => {
+                          conn.write(d.toUpperCase());
+                          conn.end()
+                      }, 10000);
+                  }
+        else {
+            conn.write(d.toUpperCase());
+            conn.end()
+        }
+
     }
     function onConnClose() {
         console.log('connection from %s closed', remoteAddress);
